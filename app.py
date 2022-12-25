@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 import logging
 from flask.logging import default_handler
+import pytz
 
 db = SQLAlchemy()
 app = Flask(__name__)
@@ -18,7 +19,7 @@ app.logger.info('Starting the Flask User Management App...')
 
 @app.route('/')
 def index():
-    app.logger.info(f"DATABASE_URL environment variable: {os.getenv('DATABASE_URL')}")
+    current_app.logger.info(f"DATABASE_URL environment variable: {os.getenv('DATABASE_URL')}")
     return 'atstk'
 
 
@@ -52,6 +53,63 @@ def create_order():
     return 'OK'
 
 
+@app.route('/api/g')
+def get_order():
+    sql_cmd = '''
+              UPDATE HEALTH_CHECK
+              SET last_check_time = CURRENT_TIMESTAMP
+              WHERE name = %s;
+              '''
+    result = db.engine.execute(sql_cmd, 'Agent')
+
+    sql_cmd = '''
+              SELECT *
+              FROM STOCK_ORDER
+              WHERE status = 'New'
+              ORDER BY create_time
+              FETCH FIRST ROW ONLY
+              '''
+
+    row = db.engine.execute(sql_cmd).first()
+    current_app.logger.info(f'row: {row}')
+    if not row:
+        return 'Not found!', 404
+
+    order_id = row['id']
+    stock_id = row['stock_id']
+    lot_num = row['lot_num']
+    order_type = row['type']
+    price_type = row['price_type']
+    price = row['price']
+    current_app.logger.info(f'order_id: {order_id}')
+    current_app.logger.info(f'stock_id: {stock_id}')
+    current_app.logger.info(f'lot_num: {lot_num}')
+    current_app.logger.info(f'order_type: {order_type}')
+    current_app.logger.info(f'price_type: {price_type}')
+    current_app.logger.info(f'price: {price}')
+
+    sql_cmd = '''
+              UPDATE STOCK_ORDER
+              SET status = 'Accept', update_time = CURRENT_TIMESTAMP
+              WHERE id = %s;
+              '''
+    result = db.engine.execute(sql_cmd, order_id)
+    return f'{order_id}|{stock_id}|{lot_num}|{order_type}|{price_type}|{price}'
+
+
+@app.route('/api/h')
+def get_health_check():
+    sql_cmd = '''
+              SELECT last_check_time
+              FROM HEALTH_CHECK
+              WHERE name = %s;
+              '''
+    row = db.engine.execute(sql_cmd, 'Agent').first()
+    last_check_time = row['last_check_time']
+    tz = pytz.timezone('Asia/Taipei')
+    last_check_time = last_check_time.replace(tzinfo=pytz.utc).astimezone(tz)
+    return last_check_time.strftime('%Y-%m-%d %H:%M:%S %z')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
-
