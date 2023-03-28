@@ -3,3 +3,4 @@ Gunicorn
 flask-sqlalchemy==3.0.0
 psycopg2
 pytz
+sqlalchemy<2.0
