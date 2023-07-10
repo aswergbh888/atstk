@@ -152,5 +152,43 @@ def get_close_order():
     return 'OK'
 
 
+@app.route('/api/cf', methods=['POST'])
+def create_order_fail_reason():
+    content = request.get_json(silent=True)
+    current_app.logger.info(f'content: {content}')
+    message = content['m']
+    current_app.logger.info(f'message: {message}')
+
+    sql_cmd = '''
+              INSERT INTO ORDER_FAIL_REASON
+              VALUES (%s, CURRENT_TIMESTAMP)
+              '''
+    result = db.engine.execute(sql_cmd, message)
+    return 'OK'
+
+
+@app.route('/api/gf')
+def get_order_fail_reason():
+    result = "Result:"
+
+    sql_cmd = '''
+              SELECT message, update_time
+              FROM ORDER_FAIL_REASON
+              ORDER BY update_time DESC
+              '''
+
+    rows = db.engine.execute(sql_cmd, 'Agent').fetchall()
+
+    for row in rows:
+        current_app.logger.info(f'row: {row}')
+        message = row['message']
+        update_time = row['update_time']
+        tz = pytz.timezone('Asia/Taipei')
+        update_time = update_time.replace(tzinfo=pytz.utc).astimezone(tz)
+        result = result + "\n" + update_time + " | " + message
+
+    return result
+
+
 if __name__ == '__main__':
     app.run(debug=True)
