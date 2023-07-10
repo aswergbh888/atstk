@@ -169,7 +169,7 @@ def create_order_fail_reason():
 
 @app.route('/api/gf')
 def get_order_fail_reason():
-    result = "Result:"
+    result = 'Result:'
 
     sql_cmd = '''
               SELECT message, update_time
@@ -185,7 +185,8 @@ def get_order_fail_reason():
         update_time = row['update_time']
         tz = pytz.timezone('Asia/Taipei')
         update_time = update_time.replace(tzinfo=pytz.utc).astimezone(tz)
-        result = result + "\n" + update_time + " | " + message
+        update_time = update_time.strftime('%Y-%m-%d %H:%M:%S %z')
+        result = result + '\n' + update_time + ' | ' + message
 
     return result
 
