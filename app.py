@@ -1,9 +1,12 @@
-from flask import *
-from flask_sqlalchemy import SQLAlchemy
 import os
 import logging
-from flask.logging import default_handler
 import pytz
+
+from flask import *
+from flask_sqlalchemy import SQLAlchemy
+from flask.logging import default_handler
+from datetime import datetime
+
 
 db = SQLAlchemy()
 app = Flask(__name__)
@@ -183,10 +186,12 @@ def get_order_fail_reason():
         current_app.logger.info(f'row: {row}')
         message = row['message']
         update_time = row['update_time']
-        tz = pytz.timezone('Asia/Taipei')
-        update_time = update_time.replace(tzinfo=pytz.utc).astimezone(tz)
-        update_time = update_time.strftime('%Y-%m-%d %H:%M:%S %z')
-        result = result + '\n' + update_time + ' | ' + message
+
+        if update_time.date() == datetime.today().date():
+            tz = pytz.timezone('Asia/Taipei')
+            update_time = update_time.replace(tzinfo=pytz.utc).astimezone(tz)
+            update_time = update_time.strftime('%Y-%m-%d %H:%M:%S %z')
+            result = result + '\n' + update_time + ' | ' + message
 
     return result
 
