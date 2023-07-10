@@ -186,11 +186,11 @@ def get_order_fail_reason():
         message = row['message']
         update_time = row['update_time']
 
-        if update_time.date() == datetime.today().date():
-            tz = pytz.timezone('Asia/Taipei')
-            update_time = update_time.replace(tzinfo=pytz.utc).astimezone(tz)
-            update_time = update_time.strftime('%Y-%m-%d %H:%M:%S %z')
-            result = result + '\n' + update_time + ' | ' + message
+        # if update_time.date() == datetime.today().date():
+        tz = pytz.timezone('Asia/Taipei')
+        update_time = update_time.replace(tzinfo=pytz.utc).astimezone(tz)
+        update_time = update_time.strftime('%Y-%m-%d %H:%M:%S %z')
+        result = result + '\n' + update_time + ' | ' + message
 
     return result
 
