@@ -111,5 +111,46 @@ def get_health_check():
     return last_check_time.strftime('%Y-%m-%d %H:%M:%S %z')
 
 
+@app.route('/api/cc', methods=['POST'])
+def create_close_order():
+    sql_cmd = '''
+              UPDATE CLOSE_ORDER
+              SET enable_flag = 1, update_time = CURRENT_TIMESTAMP
+              WHERE name = %s;
+              '''
+    result = db.engine.execute(sql_cmd, 'Agent')
+    return 'OK'
+
+
+@app.route('/api/gc')
+def get_close_order():
+    # sql_cmd = '''
+    #           UPDATE HEALTH_CHECK
+    #           SET last_check_time = CURRENT_TIMESTAMP
+    #           WHERE name = %s;
+    #           '''
+    # result = db.engine.execute(sql_cmd, 'Agent')
+
+    sql_cmd = '''
+              SELECT *
+              FROM CLOSE_ORDER
+              WHERE name = %s
+              AND enable_flag = 1
+              '''
+
+    row = db.engine.execute(sql_cmd, 'Agent').first()
+    current_app.logger.info(f'row: {row}')
+    if not row:
+        return 'Not found!', 404
+
+    sql_cmd = '''
+              UPDATE CLOSE_ORDER
+              SET enable_flag = 0, update_time = CURRENT_TIMESTAMP
+              WHERE name = %s;
+              '''
+    result = db.engine.execute(sql_cmd, 'Agent')
+    return 'OK'
+
+
 if __name__ == '__main__':
     app.run(debug=True)

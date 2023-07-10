@@ -25,3 +25,16 @@ CREATE TABLE HEALTH_CHECK(
 INSERT INTO HEALTH_CHECK
 VALUES ('Agent', CURRENT_TIMESTAMP);
 ```
+
+```sql
+CREATE TABLE CLOSE_ORDER(
+   name            VARCHAR(10)  NOT NULL,
+   enable_flag     int           NOT NULL,
+   update_time     timestamp    NOT NULL,
+);
+```
+
+```sql
+INSERT INTO CLOSE_ORDER
+VALUES ('Agent', 0, CURRENT_TIMESTAMP);
+```
