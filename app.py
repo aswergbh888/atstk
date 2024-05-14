@@ -194,6 +194,79 @@ def get_order_fail_reason():
 
     return result
 
+@app.route('/api/cr', methods=['POST'])
+def create_report():
+    content = request.get_json(silent=True)
+    current_app.logger.info(f'content: {content}')
+    text = content['t']
+    current_app.logger.info(f'message: {text}')
+
+    sql_cmd = '''
+              UPDATE ORDER_TEXT
+              SET content = %s, lock = false, upload_time = CURRENT_TIMESTAMP
+              WHERE name = %s;
+              '''
+    result = db.engine.execute(sql_cmd, (text, 'Agent'))
+    return "OK"
+
+@app.route('/api/gr', methods=['POST'])
+def get_report():
+    sql_cmd = '''
+              SELECT content
+              FROM ORDER_TEXT
+              WHERE name = 'Agent'
+                AND lock = false
+              FETCH FIRST ROW ONLY
+              '''
+    row = db.engine.execute(sql_cmd).first()
+    current_app.logger.info(f'row: {row}')
+    if not row:
+        text = 'OK'
+    else:
+        text = row['content']
+
+        sql_cmd = '''
+                  UPDATE ORDER_TEXT
+                  SET lock = true
+                  WHERE name = %s;
+                  '''
+        result = db.engine.execute(sql_cmd, 'Agent')
+        
+    return text
+
+@app.route('/api/cs', methods=['POST'])
+def create_status_request():
+    sql_cmd = '''
+              UPDATE ORDER_STATUS
+              SET request = true, request_time = CURRENT_TIMESTAMP
+              WHERE name = 'Server'
+              '''
+    result = db.engine.execute(sql_cmd)
+    return 'OK'
+
+@app.route('/api/gs')
+def get_status_request():
+    sql_cmd = '''
+              SELECT *
+              FROM ORDER_STATUS
+              WHERE name = 'Server'
+                AND request = true
+              FETCH FIRST ROW ONLY
+              '''
+
+    row = db.engine.execute(sql_cmd).first()
+    current_app.logger.info(f'row: {row}')
+    if not row:
+        return 'Not found!', 404
+
+    sql_cmd = '''
+              UPDATE ORDER_STATUS
+              SET request = false
+              WHERE name = 'Server'
+              '''
+    result = db.engine.execute(sql_cmd)
+    return 'OK'
+
 
 if __name__ == '__main__':
     app.run(debug=True)
