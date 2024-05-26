@@ -39,7 +39,7 @@ def create_order():
     # 2|2723|1|Sell|Fix|120.0
     order_id = int(message_split[0])
     stock_id = message_split[1]
-    lot_num = 1  # int(message_split[2])
+    lot_num = int(message_split[2])  # 1
     order_type = message_split[3]
     price_type = message_split[4]
     price = float(message_split[5])
