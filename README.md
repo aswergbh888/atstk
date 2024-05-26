@@ -30,7 +30,7 @@ VALUES ('Agent', CURRENT_TIMESTAMP);
 CREATE TABLE CLOSE_ORDER(
    name            VARCHAR(10)  NOT NULL,
    enable_flag     int          NOT NULL,
-   update_time     timestamp    NOT NULL,
+   update_time     timestamp    NOT NULL
 );
 ```
 
@@ -45,4 +45,31 @@ CREATE TABLE ORDER_FAIL_REASON(
    message       TEXT         NOT NULL,
    update_time   timestamp    NOT NULL
 );
+```
+
+```sql
+CREATE TABLE ORDER_STATUS(
+    name  VARCHAR(10)       NOT NULL,
+    request  boolean        NOT NULL,
+    request_time timestamp  NOT NULL
+);
+```
+
+```sql
+INSERT INTO ORDER_STATUS
+VALUES ('Server', true, CURRENT_TIMESTAMP);
+```
+
+```sql
+CREATE TABLE ORDER_TEXT(
+    name  VARCHAR(10)     NOT NULL,
+    content   TEXT        NOT NULL,
+    lock  boolean         NOT NULL,
+    upload_time timestamp  NOT NULL
+);
+```
+
+```sql
+INSERT INTO ORDER_IMAGE
+VALUES ('Agent', '', false, CURRENT_TIMESTAMP);
 ```
